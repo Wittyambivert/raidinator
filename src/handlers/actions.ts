@@ -30,6 +30,11 @@ export async function react(
     reactions.push(new Api.ReactionEmoji({ emoticon: secondEmoji }));
   }
 
+  if (config.DRY_RUN) {
+    logger.info({ action: 'react', messageId: message.id, emoji }, 'Dry-run: would react');
+    return { success: true, emoji };
+  }
+
   try {
     await withFloodWait(
       () => client.invoke(
@@ -61,6 +66,11 @@ export async function reply(
   ctx: PlaceholderContext,
 ): Promise<{ success: boolean; text?: string; source?: string; error?: string }> {
   const result = await generateReply(message.text ?? '', ctx);
+
+  if (config.DRY_RUN) {
+    logger.info({ action: 'reply', messageId: message.id, text: result.text, source: result.source }, 'Dry-run: would reply');
+    return { success: true, text: result.text, source: result.source };
+  }
 
   try {
     if (config.TYPING_INDICATOR_MS > 0) {
@@ -114,6 +124,11 @@ export async function clickInlineButton(
 
     const button = buttons[Math.floor(Math.random() * buttons.length)]!;
 
+    if (config.DRY_RUN) {
+      logger.info({ action: 'click', messageId: message.id, button: button.text }, 'Dry-run: would click button');
+      return { success: true };
+    }
+
     await withFloodWait(
       () => client.invoke(
         new Api.messages.GetBotCallbackAnswer({
@@ -149,23 +164,12 @@ export async function dispatchActions(
     click: { success: false },
   };
 
-  result.react = await react(client, message, groupConfig);
-
   result.reply = await reply(client, message, groupConfig, groupTitle, ctx);
-
-  const hasButtons = !!(message.replyMarkup as { rows?: unknown } | null)?.rows;
-  if (hasButtons) {
-    result.click = await clickInlineButton(client, message);
-  } else {
-    logger.info({ action: 'click', messageId: message.id }, 'Click skipped — no replyMarkup');
-  }
 
   logger.info({
     messageId: message.id,
-    react: result.react.success ? `✓ ${result.react.emoji ?? ''}` : '✗',
     reply: result.reply.success ? `✓ ${result.reply.text?.slice(0, 40) ?? ''}` : `✗ ${result.reply.error ?? ''}`,
-    click: result.click.success ? '✓' : result.click.error ? `✗ ${result.click.error}` : '—',
-  }, 'Dispatch complete');
+  }, 'Reply dispatched');
 
   return result;
 }

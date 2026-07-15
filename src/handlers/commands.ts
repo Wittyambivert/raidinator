@@ -57,7 +57,6 @@ export async function handleCommand(
   if (text === '/config') {
     const info = [
       `Keywords: ${config.KEYWORDS.join(', ') || '(none)'}`,
-      `Target users: ${config.TARGET_USERS.join(', ') || '(all)'}`,
       `Max actions/hour: ${config.MAX_ACTIONS_PER_HOUR}`,
       `Skip probability: ${config.SKIP_PROBABILITY}`,
       `LLM: ${config.LLM_API_KEY ? `${config.LLM_PROVIDER || 'custom'} (${config.LLM_MODEL})` : 'disabled'}`,

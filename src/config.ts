@@ -1,6 +1,16 @@
 import { z } from 'zod';
 import 'dotenv/config';
 
+function booleanEnv(defaultValue: boolean) {
+  return z.union([z.boolean(), z.string()])
+    .transform((value) => {
+      if (typeof value === 'boolean') return value;
+      const trimmed = value.trim().toLowerCase();
+      return trimmed === 'true' || trimmed === '1';
+    })
+    .default(defaultValue);
+}
+
 const envSchema = z.object({
   API_ID: z.coerce.number().int().positive('API_ID must be a positive integer'),
   API_HASH: z.string().min(1, 'API_HASH is required'),
@@ -19,7 +29,7 @@ const envSchema = z.object({
   TYPING_INDICATOR_MS: z.coerce.number().int().min(0).max(10000).default(1500),
   COOLDOWN_BETWEEN_ACTIONS_S: z.coerce.number().int().min(0).default(20),
   MAX_EXISTING_REACTIONS: z.coerce.number().int().min(0).default(5),
-  REACT_TO_MEDIA: z.coerce.boolean().default(true),
+  REACT_TO_MEDIA: booleanEnv(true),
 
   LLM_PROVIDER: z.string().optional().default(''),
   LLM_API_KEY: z.string().optional().default(''),
@@ -35,12 +45,12 @@ const envSchema = z.object({
   REACT_EMOJIS: z.string().default('💯,👍,❤️,👏,😂'),
   REACT_DOUBLE_PROBABILITY: z.coerce.number().min(0).max(1).default(0.1),
 
-  EMERGENCY_STOP_ENABLED: z.coerce.boolean().default(true),
+  EMERGENCY_STOP_ENABLED: booleanEnv(true),
   ADMIN_USERNAME: z.string().optional().default(''),
 
   SESSION_ENCRYPTION_KEY: z.string().optional().default(''),
 
-  DRY_RUN: z.coerce.boolean().default(false),
+  DRY_RUN: booleanEnv(false),
 
   HEARTBEAT_INTERVAL_MINUTES: z.coerce.number().int().min(1).default(30),
   MAX_RESTARTS_PER_HOUR: z.coerce.number().int().min(1).default(5),
@@ -56,7 +66,6 @@ type RawConfig = z.infer<typeof envSchema>;
 export interface GroupConfig {
   name: string;
   keywords: string[];
-  targetUsers: string[];
   skipProbability: number;
   maxActionsPerHour: number;
 }
@@ -128,7 +137,6 @@ function parseCsv(value: string): string[] {
 
 interface GroupOverride {
   keywords?: string;
-  target_users?: string;
   skip_probability?: number;
   max_actions_per_hour?: number;
 }
@@ -149,7 +157,6 @@ function parseGroupConfigs(raw: RawConfig): Map<string, GroupConfig> {
     configs.set(name, {
       name,
       keywords: override.keywords ? parseCsv(override.keywords) : parseCsv(raw.KEYWORDS),
-      targetUsers: override.target_users ? parseCsv(override.target_users) : parseCsv(raw.TARGET_USERS),
       skipProbability: override.skip_probability ?? raw.SKIP_PROBABILITY,
       maxActionsPerHour: override.max_actions_per_hour ?? raw.MAX_ACTIONS_PER_HOUR,
     });
