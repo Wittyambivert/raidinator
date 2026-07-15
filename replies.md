@@ -1,0 +1,32 @@
+- Good one!
+- lol
+- agree
+- nice
+- fr
+- exactly
+- this
+- based
+- haha
+- true
+- same
+- yep
+- ngl that's good
+- solid take
+- wait really?
+- no way
+- i was thinking the same
+- hmm
+- nice one {sender}
+- {sender} cooking as usual
+- fr {sender}
+- good point {sender}
+- {sender} based
+- 🔥
+- 💯
+- lmao
+- fair
+- bet
+- ong
+- valid
+- respect
+- let's go

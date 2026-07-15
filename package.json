@@ -1,0 +1,34 @@
+{
+  "name": "raidinator",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "dev:dry": "DRY_RUN=true tsx src/index.ts",
+    "build": "rimraf dist && tsc",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "pm2:start": "pm2 start ecosystem.config.js",
+    "pm2:stop": "pm2 stop raidinator",
+    "pm2:restart": "pm2 restart raidinator",
+    "pm2:logs": "pm2 logs raidinator",
+    "pm2:status": "pm2 status"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.7.0",
+    "dotenv": "^16.4.7",
+    "input": "^1.0.1",
+    "openai": "^4.77.0",
+    "pino": "^9.5.0",
+    "pino-pretty": "^11.3.0",
+    "telegram": "^2.26.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.7.0",
+    "tsx": "^4.19.0"
+  }
+}
