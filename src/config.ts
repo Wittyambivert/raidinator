@@ -41,6 +41,14 @@ const envSchema = z.object({
   LLM_SYSTEM_PROMPT: z.string().optional().default(
     'You are {senderName} in a Telegram group called {group}. Reply to {sender}\'s message with a short, casual response. 1-8 words. No emoji unless the message uses them. Maximum one emoji. Sound like a real person, not a bot. Reply ONLY with the text.',
   ),
+  LLM_TEMPERATURE: z.coerce.number().min(0).max(2).default(0.5),
+
+  LLM_REJECT_INSTRUCTION_OVERRIDE: booleanEnv(true),
+  LLM_BLOCKED_INPUT_PATTERNS: z.string().optional().default('ignore previous instructions,ignore the above,reveal your prompt,system prompt,you are now,pretend you are'),
+  LLM_BLOCKED_OUTPUT_PATTERNS: z.string().optional().default(''),
+  LLM_HALLUCINATION_MARKERS: z.string().optional().default('I think,I\'m not sure,I believe,as far as I know,maybe,possibly,probably,it seems,I recall,I remember,I\'m an AI,as an AI'),
+  LLM_PII_FILTER: booleanEnv(true),
+  LLM_AUDIT_LOG: booleanEnv(false),
 
   REACT_EMOJIS: z.string().default('💯,👍,❤️,👏,😂'),
   REACT_DOUBLE_PROBABILITY: z.coerce.number().min(0).max(1).default(0.1),
@@ -99,6 +107,13 @@ export interface Config {
   LLM_TIMEOUT_MS: number;
   MAX_REPLY_TOKENS: number;
   LLM_SYSTEM_PROMPT: string;
+  LLM_TEMPERATURE: number;
+  LLM_REJECT_INSTRUCTION_OVERRIDE: boolean;
+  LLM_BLOCKED_INPUT_PATTERNS: string[];
+  LLM_BLOCKED_OUTPUT_PATTERNS: string[];
+  LLM_HALLUCINATION_MARKERS: string[];
+  LLM_PII_FILTER: boolean;
+  LLM_AUDIT_LOG: boolean;
 
   REACT_EMOJIS: string[];
   REACT_DOUBLE_PROBABILITY: number;
@@ -121,7 +136,8 @@ export interface Config {
 
 const LLM_PROVIDER_DEFAULTS: Record<string, { baseURL: string; model: string }> = {
   openai: { baseURL: 'https://api.openai.com/v1', model: 'gpt-4o-mini' },
-  groq: { baseURL: 'https://api.groq.com/openai/v1', model: 'llama-3.3-70b-versatile' },
+  'opencode-go': { baseURL: 'https://opencode.ai/zen/go/v1', model: 'kimi-k2.7-code' },
+  groq: { baseURL: 'https://groq.com/openai/v1', model: 'llama-3.3-70b-versatile' },
   deepseek: { baseURL: 'https://api.deepseek.com/v1', model: 'deepseek-chat' },
   together: { baseURL: 'https://api.together.xyz/v1', model: 'meta-llama/Llama-3.3-70B-Instruct-Turbo' },
   ollama: { baseURL: 'http://localhost:11434/v1', model: 'llama3.2' },
@@ -234,6 +250,13 @@ export function loadConfig(): Config {
     LLM_TIMEOUT_MS: raw.LLM_TIMEOUT_MS,
     MAX_REPLY_TOKENS: raw.MAX_REPLY_TOKENS,
     LLM_SYSTEM_PROMPT: raw.LLM_SYSTEM_PROMPT,
+    LLM_TEMPERATURE: raw.LLM_TEMPERATURE,
+    LLM_REJECT_INSTRUCTION_OVERRIDE: raw.LLM_REJECT_INSTRUCTION_OVERRIDE,
+    LLM_BLOCKED_INPUT_PATTERNS: parseCsv(raw.LLM_BLOCKED_INPUT_PATTERNS),
+    LLM_BLOCKED_OUTPUT_PATTERNS: parseCsv(raw.LLM_BLOCKED_OUTPUT_PATTERNS),
+    LLM_HALLUCINATION_MARKERS: parseCsv(raw.LLM_HALLUCINATION_MARKERS),
+    LLM_PII_FILTER: raw.LLM_PII_FILTER,
+    LLM_AUDIT_LOG: raw.LLM_AUDIT_LOG,
 
     REACT_EMOJIS: parseCsv(raw.REACT_EMOJIS),
     REACT_DOUBLE_PROBABILITY: raw.REACT_DOUBLE_PROBABILITY,
